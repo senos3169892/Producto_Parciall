@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.ctma.model.EstadoSolicitud
 import com.example.ctma.model.SolicitudPrestamo
 
 @Composable
@@ -90,7 +91,7 @@ fun SolicitudesScreen(
                                 text = "Estado: ${solicitud.estado}"
                             )
 
-                            if (solicitud.estado.toString() != "CANCELADA") {
+                            if (solicitud.estado == EstadoSolicitud.SOLICITADA) {
 
                                 Row(
                                     modifier = Modifier.fillMaxWidth()

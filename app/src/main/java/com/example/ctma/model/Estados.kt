@@ -7,7 +7,7 @@ enum class EstadoEquipo {
 }
 
 enum class EstadoSolicitud {
-    PENDIENTE,
+    SOLICITADA,
     APROBADA,
     RECHAZADA,
     CANCELADA

@@ -89,14 +89,13 @@ fun PrestamoApp(
                 onEquipoSeleccionado = { equipo ->
 
                     equipoSeleccionado = equipo
-
                     pantallaActual = 2
                 }
             )
         }
 
         // ==========================================
-        // LISTA DE SOLICITUDES
+        // SOLICITUDES
         // ==========================================
 
         1 -> {
@@ -106,9 +105,11 @@ fun PrestamoApp(
 
                 onCancelarSolicitud = { id ->
 
-                    viewModel.cancelarSolicitud(id)
+                    val resultado = viewModel.cancelarSolicitud(id)
 
-                    actualizarSolicitudes++
+                    if (resultado.isSuccess) {
+                        actualizarSolicitudes++
+                    }
                 }
             )
         }
@@ -128,13 +129,16 @@ fun PrestamoApp(
 
                     onSolicitudCreada = { solicitud ->
 
-                        viewModel.crearSolicitud(solicitud)
+                        val resultado = viewModel.crearSolicitud(solicitud)
 
-                        actualizarSolicitudes++
+                        if (resultado.isSuccess) {
 
-                        equipoSeleccionado = null
+                            actualizarSolicitudes++
 
-                        pantallaActual = 1
+                            equipoSeleccionado = null
+
+                            pantallaActual = 1
+                        }
                     }
                 )
 

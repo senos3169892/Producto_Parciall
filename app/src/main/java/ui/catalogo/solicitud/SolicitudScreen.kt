@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.ctma.model.Equipo
+import com.example.ctma.model.EstadoEquipo
 import com.example.ctma.model.EstadoSolicitud
 import com.example.ctma.model.SolicitudPrestamo
 
@@ -69,96 +70,106 @@ fun SolicitudScreen(
             text = "Estado: ${equipo.estado}"
         )
 
-        OutlinedTextField(
-            value = ambienteDestino,
-            onValueChange = {
-                ambienteDestino = it
-                error = ""
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Ambiente de destino")
-            },
-            singleLine = true
-        )
-
-        OutlinedTextField(
-            value = proposito,
-            onValueChange = {
-                proposito = it
-                error = ""
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Propósito del préstamo")
-            },
-            minLines = 3
-        )
-
-        OutlinedTextField(
-            value = duracionTexto,
-            onValueChange = {
-                duracionTexto = it
-                error = ""
-            },
-            modifier = Modifier.fillMaxWidth(),
-            label = {
-                Text("Duración en horas")
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Number
-            )
-        )
-
-        if (error.isNotEmpty()) {
+        if (equipo.estado != EstadoEquipo.DISPONIBLE) {
 
             Text(
-                text = error,
+                text = "Este equipo no está disponible para préstamo.",
                 color = MaterialTheme.colorScheme.error
             )
-        }
 
-        Button(
-            onClick = {
+        } else {
 
-                val horas = duracionTexto.toIntOrNull()
-
-                when {
-
-                    ambienteDestino.isBlank() -> {
-                        error = "Ingresa el ambiente de destino"
-                    }
-
-                    proposito.isBlank() -> {
-                        error = "Ingresa el propósito del préstamo"
-                    }
-
-                    horas == null || horas <= 0 -> {
-                        error = "Ingresa una duración válida"
-                    }
-
-                    else -> {
-
-                        val solicitud = SolicitudPrestamo(
-                            id = 0,
-                            equipoId = equipo.id,
-                            ambienteDestino = ambienteDestino,
-                            proposito = proposito,
-                            duracionHoras = horas,
-                            estado = EstadoSolicitud.PENDIENTE
-                        )
-
-                        onSolicitudCreada(solicitud)
-                    }
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-            Text(
-                text = "Crear solicitud"
+            OutlinedTextField(
+                value = ambienteDestino,
+                onValueChange = {
+                    ambienteDestino = it
+                    error = ""
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Ambiente de destino")
+                },
+                singleLine = true
             )
+
+            OutlinedTextField(
+                value = proposito,
+                onValueChange = {
+                    proposito = it
+                    error = ""
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Propósito del préstamo")
+                },
+                minLines = 3
+            )
+
+            OutlinedTextField(
+                value = duracionTexto,
+                onValueChange = {
+                    duracionTexto = it
+                    error = ""
+                },
+                modifier = Modifier.fillMaxWidth(),
+                label = {
+                    Text("Duración en horas")
+                },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number
+                )
+            )
+
+            if (error.isNotEmpty()) {
+
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            Button(
+                onClick = {
+
+                    val horas = duracionTexto.toIntOrNull()
+
+                    when {
+
+                        ambienteDestino.isBlank() -> {
+                            error = "Ingresa el ambiente de destino"
+                        }
+
+                        proposito.isBlank() -> {
+                            error = "Ingresa el propósito del préstamo"
+                        }
+
+                        horas == null || horas <= 0 -> {
+                            error = "Ingresa una duración válida"
+                        }
+
+                        else -> {
+
+                            val solicitud = SolicitudPrestamo(
+                                id = 0,
+                                equipoId = equipo.id,
+                                ambienteDestino = ambienteDestino.trim(),
+                                proposito = proposito.trim(),
+                                duracionHoras = horas,
+                                estado = EstadoSolicitud.SOLICITADA
+                            )
+
+                            onSolicitudCreada(solicitud)
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    text = "Crear solicitud"
+                )
+            }
         }
     }
 }

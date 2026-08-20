@@ -64,7 +64,41 @@ class InMemoryPrestamoRepository : PrestamoRepository {
             )
         }
 
-        solicitudes.add(solicitud)
+        val solicitudActiva = solicitudes.any {
+            it.equipoId == solicitud.equipoId &&
+                    it.estado == EstadoSolicitud.SOLICITADA
+        }
+
+        if (solicitudActiva) {
+            return Result.failure(
+                IllegalStateException(
+                    "El equipo ya tiene una solicitud activa"
+                )
+            )
+        }
+
+        val nuevoId = if (solicitudes.isEmpty()) {
+            1
+        } else {
+            solicitudes.maxOf { it.id } + 1
+        }
+
+        val nuevaSolicitud = solicitud.copy(
+            id = nuevoId,
+            estado = EstadoSolicitud.SOLICITADA
+        )
+
+        solicitudes.add(nuevaSolicitud)
+
+        val indiceEquipo = equipos.indexOfFirst {
+            it.id == equipo.id
+        }
+
+        if (indiceEquipo != -1) {
+            equipos[indiceEquipo] = equipo.copy(
+                estado = EstadoEquipo.PRESTADO
+            )
+        }
 
         return Result.success(Unit)
     }
@@ -79,7 +113,42 @@ class InMemoryPrestamoRepository : PrestamoRepository {
             )
         }
 
-        solicitudes.remove(solicitud)
+        if (solicitud.estado != EstadoSolicitud.SOLICITADA) {
+            return Result.failure(
+                IllegalStateException(
+                    "Solo se pueden cancelar solicitudes solicitadas"
+                )
+            )
+        }
+
+        val indiceSolicitud = solicitudes.indexOfFirst {
+            it.id == id
+        }
+
+        if (indiceSolicitud == -1) {
+            return Result.failure(
+                IllegalArgumentException("La solicitud no existe")
+            )
+        }
+
+        solicitudes[indiceSolicitud] = solicitud.copy(
+            estado = EstadoSolicitud.CANCELADA
+        )
+
+        val equipo = obtenerEquipo(solicitud.equipoId)
+
+        if (equipo != null) {
+
+            val indiceEquipo = equipos.indexOfFirst {
+                it.id == equipo.id
+            }
+
+            if (indiceEquipo != -1) {
+                equipos[indiceEquipo] = equipo.copy(
+                    estado = EstadoEquipo.DISPONIBLE
+                )
+            }
+        }
 
         return Result.success(Unit)
     }
