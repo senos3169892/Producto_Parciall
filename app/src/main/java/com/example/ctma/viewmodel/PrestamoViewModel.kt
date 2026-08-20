@@ -17,11 +17,15 @@ class PrestamoViewModel : ViewModel() {
         return repository.obtenerSolicitudes()
     }
 
-    fun crearSolicitud(solicitud: SolicitudPrestamo): Result<Unit> {
+    fun crearSolicitud(
+        solicitud: SolicitudPrestamo
+    ): Result<Unit> {
         return repository.crearSolicitud(solicitud)
     }
 
-    fun cancelarSolicitud(id: Int): Result<Unit> {
+    fun cancelarSolicitud(
+        id: Int
+    ): Result<Unit> {
         return repository.cancelarSolicitud(id)
     }
 }

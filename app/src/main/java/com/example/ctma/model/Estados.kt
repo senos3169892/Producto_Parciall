@@ -2,15 +2,13 @@ package com.example.ctma.model
 
 enum class EstadoEquipo {
     DISPONIBLE,
-    RESERVADO,
-    PRESTADO
+    PRESTADO,
+    MANTENIMIENTO
 }
 
 enum class EstadoSolicitud {
-    SOLICITADA,
+    PENDIENTE,
     APROBADA,
-    ENTREGADA,
-    DEVUELTA,
-    CANCELADA,
-    RECHAZADA
+    RECHAZADA,
+    CANCELADA
 }
