@@ -35,6 +35,10 @@ class PrestamoViewModel : ViewModel() {
         return repository.obtenerSolicitudes()
     }
 
+    fun obtenerSolicitud(id: Int): SolicitudPrestamo? {
+        return repository.obtenerSolicitud(id)
+    }
+
     fun crearSolicitud(
         solicitud: SolicitudPrestamo
     ): Result<Unit> {

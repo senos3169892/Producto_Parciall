@@ -28,7 +28,7 @@ import com.example.ctma.propositoValido
 @Composable
 fun SolicitudScreen(
     equipo: Equipo,
-    onSolicitudCreada: (SolicitudPrestamo) -> Unit
+    onSolicitudCreada: (SolicitudPrestamo) -> Result<Unit>
 ) {
 
     var ambienteDestino by remember {
@@ -173,7 +173,12 @@ fun SolicitudScreen(
                             estado = EstadoSolicitud.SOLICITADA
                         )
 
-                        onSolicitudCreada(solicitud)
+                        val resultado = onSolicitudCreada(solicitud)
+
+                        if (resultado.isFailure) {
+                            error = resultado.exceptionOrNull()?.message
+                                ?: "No se pudo crear la solicitud"
+                        }
                     }
                 }
             },

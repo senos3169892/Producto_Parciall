@@ -25,8 +25,10 @@ import com.example.ctma.model.Equipo
 @Composable
 fun CatalogoScreen(
     equipos: List<Equipo>,
-    onEquipoSeleccionado: (Equipo) -> Unit
+    onEquipoSeleccionado: (Equipo) -> Unit,
+    onMisSolicitudes: () -> Unit
 ) {
+
     var equipoSeleccionado by remember {
         mutableStateOf<Equipo?>(null)
     }
@@ -42,8 +44,27 @@ fun CatalogoScreen(
             Text(
                 text = "Catálogo de equipos",
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 12.dp)
             )
+
+            // ==============================
+            // BOTÓN MIS SOLICITUDES
+            // ==============================
+
+            Button(
+                onClick = {
+                    onMisSolicitudes()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+                Text("Mis solicitudes")
+            }
+
+            // ==============================
+            // LISTA DE EQUIPOS
+            // ==============================
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),

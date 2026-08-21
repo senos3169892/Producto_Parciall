@@ -21,7 +21,9 @@ import com.example.ctma.model.SolicitudPrestamo
 @Composable
 fun SolicitudesScreen(
     solicitudes: List<SolicitudPrestamo>,
-    onCancelarSolicitud: (Int) -> Unit
+    onCancelarSolicitud: (Int) -> Unit,
+    onSolicitudSeleccionada: (Int) -> Unit,
+    onVolverCatalogo: () -> Unit
 ) {
 
     Column(
@@ -33,8 +35,19 @@ fun SolicitudesScreen(
         Text(
             text = "Mis solicitudes",
             style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        Button(
+            onClick = {
+                onVolverCatalogo()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Volver al catálogo")
+        }
 
         if (solicitudes.isEmpty()) {
 
@@ -91,22 +104,29 @@ fun SolicitudesScreen(
                                 text = "Estado: ${solicitud.estado}"
                             )
 
-                            if (solicitud.estado == EstadoSolicitud.SOLICITADA) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
 
-                                Row(
-                                    modifier = Modifier.fillMaxWidth()
+                                Button(
+                                    onClick = {
+                                        onSolicitudSeleccionada(solicitud.id)
+                                    },
+                                    modifier = Modifier.weight(1f)
                                 ) {
+                                    Text("Ver detalle")
+                                }
+
+                                if (solicitud.estado == EstadoSolicitud.SOLICITADA) {
 
                                     Button(
                                         onClick = {
                                             onCancelarSolicitud(solicitud.id)
                                         },
-                                        modifier = Modifier.fillMaxWidth()
+                                        modifier = Modifier.weight(1f)
                                     ) {
-
-                                        Text(
-                                            text = "Cancelar solicitud"
-                                        )
+                                        Text("Cancelar")
                                     }
                                 }
                             }

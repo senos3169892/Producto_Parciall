@@ -21,6 +21,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
+
             PrestamoLabCTMAATheme {
 
                 Surface(
@@ -29,20 +30,11 @@ class MainActivity : ComponentActivity() {
 
                     val prestamoViewModel: PrestamoViewModel = viewModel()
 
-                    PrestamoApp(
+                    AppNavigation(
                         viewModel = prestamoViewModel
                     )
                 }
             }
         }
     }
-}
-
-@Composable
-fun PrestamoApp(
-    viewModel: PrestamoViewModel
-) {
-    AppNavigation(
-        viewModel = viewModel
-    )
 }
