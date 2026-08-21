@@ -30,6 +30,8 @@ class InMemoryPrestamoRepository : PrestamoRepository {
 
     private val solicitudes = mutableListOf<SolicitudPrestamo>()
 
+    private var siguienteIdSolicitud = 1
+
     override fun obtenerEquipos(): List<Equipo> {
         return equipos.toList()
     }
@@ -52,67 +54,80 @@ class InMemoryPrestamoRepository : PrestamoRepository {
 
         val equipo = obtenerEquipo(solicitud.equipoId)
 
+        // Validar que el equipo exista
         if (equipo == null) {
             return Result.failure(
-                IllegalArgumentException("El equipo no existe")
+                IllegalArgumentException(
+                    "El equipo no existe"
+                )
             )
         }
 
+        // Validar disponibilidad
         if (equipo.estado != EstadoEquipo.DISPONIBLE) {
             return Result.failure(
-                IllegalStateException("El equipo no está disponible")
+                IllegalStateException(
+                    "El equipo no está disponible"
+                )
             )
         }
 
+        // Evitar solicitudes duplicadas
         val solicitudActiva = solicitudes.any {
             it.equipoId == solicitud.equipoId &&
-                    it.estado == EstadoSolicitud.SOLICITADA
+                    (
+                            it.estado == EstadoSolicitud.SOLICITADA ||
+                                    it.estado == EstadoSolicitud.APROBADA
+                            )
         }
 
         if (solicitudActiva) {
             return Result.failure(
                 IllegalStateException(
-                    "El equipo ya tiene una solicitud activa"
+                    "Ya existe una solicitud activa para este equipo"
                 )
             )
         }
 
-        val nuevoId = if (solicitudes.isEmpty()) {
-            1
-        } else {
-            solicitudes.maxOf { it.id } + 1
-        }
-
+        // Crear una solicitud con un ID único
         val nuevaSolicitud = solicitud.copy(
-            id = nuevoId,
+            id = siguienteIdSolicitud,
             estado = EstadoSolicitud.SOLICITADA
         )
 
+        siguienteIdSolicitud++
+
         solicitudes.add(nuevaSolicitud)
 
-        val indiceEquipo = equipos.indexOfFirst {
-            it.id == equipo.id
-        }
-
-        if (indiceEquipo != -1) {
-            equipos[indiceEquipo] = equipo.copy(
-                estado = EstadoEquipo.PRESTADO
-            )
-        }
+        // El equipo deja de estar disponible
+        actualizarEstadoEquipo(
+            equipoId = equipo.id,
+            nuevoEstado = EstadoEquipo.PRESTADO
+        )
 
         return Result.success(Unit)
     }
 
-    override fun cancelarSolicitud(id: Int): Result<Unit> {
+    override fun cancelarSolicitud(
+        id: Int
+    ): Result<Unit> {
 
-        val solicitud = obtenerSolicitud(id)
+        val indice = solicitudes.indexOfFirst {
+            it.id == id
+        }
 
-        if (solicitud == null) {
+        // Validar que la solicitud exista
+        if (indice == -1) {
             return Result.failure(
-                IllegalArgumentException("La solicitud no existe")
+                IllegalArgumentException(
+                    "La solicitud no existe"
+                )
             )
         }
 
+        val solicitud = solicitudes[indice]
+
+        // Solo se puede cancelar una solicitud SOLICITADA
         if (solicitud.estado != EstadoSolicitud.SOLICITADA) {
             return Result.failure(
                 IllegalStateException(
@@ -121,35 +136,34 @@ class InMemoryPrestamoRepository : PrestamoRepository {
             )
         }
 
-        val indiceSolicitud = solicitudes.indexOfFirst {
-            it.id == id
-        }
-
-        if (indiceSolicitud == -1) {
-            return Result.failure(
-                IllegalArgumentException("La solicitud no existe")
-            )
-        }
-
-        solicitudes[indiceSolicitud] = solicitud.copy(
+        // Mantener la solicitud, cambiando su estado
+        solicitudes[indice] = solicitud.copy(
             estado = EstadoSolicitud.CANCELADA
         )
 
-        val equipo = obtenerEquipo(solicitud.equipoId)
-
-        if (equipo != null) {
-
-            val indiceEquipo = equipos.indexOfFirst {
-                it.id == equipo.id
-            }
-
-            if (indiceEquipo != -1) {
-                equipos[indiceEquipo] = equipo.copy(
-                    estado = EstadoEquipo.DISPONIBLE
-                )
-            }
-        }
+        // El equipo vuelve a estar disponible
+        actualizarEstadoEquipo(
+            equipoId = solicitud.equipoId,
+            nuevoEstado = EstadoEquipo.DISPONIBLE
+        )
 
         return Result.success(Unit)
+    }
+
+    private fun actualizarEstadoEquipo(
+        equipoId: Int,
+        nuevoEstado: EstadoEquipo
+    ) {
+
+        val indice = equipos.indexOfFirst {
+            it.id == equipoId
+        }
+
+        if (indice != -1) {
+
+            equipos[indice] = equipos[indice].copy(
+                estado = nuevoEstado
+            )
+        }
     }
 }

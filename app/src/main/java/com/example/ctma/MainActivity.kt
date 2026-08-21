@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ctma.model.Equipo
@@ -65,15 +66,12 @@ fun PrestamoApp(
         mutableStateOf<Equipo?>(null)
     }
 
-    var actualizarSolicitudes by remember {
-        mutableIntStateOf(0)
-    }
-
-    val equipos = viewModel.obtenerEquipos()
-
-    val solicitudes = remember(actualizarSolicitudes) {
-        viewModel.obtenerSolicitudes()
-    }
+    /*
+     * Observamos el estado del ViewModel.
+     * Cuando se crea o cancela una solicitud,
+     * el StateFlow se actualiza automáticamente.
+     */
+    val uiState by viewModel.uiState.collectAsState()
 
     when (pantallaActual) {
 
@@ -84,7 +82,7 @@ fun PrestamoApp(
         0 -> {
 
             CatalogoScreen(
-                equipos = equipos,
+                equipos = uiState.equipos,
 
                 onEquipoSeleccionado = { equipo ->
 
@@ -101,15 +99,11 @@ fun PrestamoApp(
         1 -> {
 
             SolicitudesScreen(
-                solicitudes = solicitudes,
+                solicitudes = uiState.solicitudes,
 
                 onCancelarSolicitud = { id ->
 
-                    val resultado = viewModel.cancelarSolicitud(id)
-
-                    if (resultado.isSuccess) {
-                        actualizarSolicitudes++
-                    }
+                    viewModel.cancelarSolicitud(id)
                 }
             )
         }
@@ -132,8 +126,6 @@ fun PrestamoApp(
                         val resultado = viewModel.crearSolicitud(solicitud)
 
                         if (resultado.isSuccess) {
-
-                            actualizarSolicitudes++
 
                             equipoSeleccionado = null
 
